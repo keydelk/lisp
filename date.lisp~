@@ -1,0 +1,98 @@
+;;;; Date Parsing function and helper function. From ANSI Common Lisp by Graham
+
+(defun tokens (str test start)
+  (let ((p1 (position-if test str :start start)))
+    (if p1
+	(let ((p2 (position-if #'(lambda (c)
+				   (not (funcall test c)))
+			       str :start p1)))
+	  (cons (subseq str p1 p2)
+		(if p2
+		    (tokens str test p2)
+		    nil)))
+	nil)))
+
+(defun constituent (c)
+  (and (graphic-char-p c)
+       (not (char= c #\ ))))
+
+(defun parse-date (str)
+  (let ((toks (tokens str #'constituent 0)))
+    (list (parse-integer (first toks))
+	  (parse-month (second toks))
+	  (parse-integer (third toks)))))
+
+(defconstant month-names
+  #("jan" "feb" "mar" "apr" "may" "jun"
+    "jul" "aug" "sep" "oct" "nov" "dec"))
+
+(defun parse-month (str)
+  (let ((p (position str month-names :test #'string-equal)))
+    (if p
+	(+ p 1)
+	nil)))
+
+(defun month-length (mon)
+  (case mon
+    ((jan mar may jul aug oct dec) 31)
+    ((apr jun sept nov) 30)
+    (feb (if (leap-year) 29 28))
+    (otherwise "unknown month")))
+
+(defconstant month
+  #(0 31 59 90 120 151 181 212 243 273 304 334 365))
+
+(defconstant yzero 2000)
+
+(defun leap? (y)
+  (and (zerop (mod y 4))
+       (or (zerop (mod y 400))
+	   (not (zerop (mod y 100))))))
+
+(defun year-days (y)
+  (if (leap? y) 366 365))
+
+(defun month-num (m y)
+  (+ (svref month (- m 1))
+     (if (and (> m 2) (leap? y)) 1 0)))
+
+(defun year-num (y)
+  (let ((d 0))
+    (if (>= y yzero)
+	(dotimes (i (- y yzero) d)
+	  (incf d (year-days (+ yzero i))))
+	(dotimes (i (- yzero y) (- d))
+	  (incf d (year-days (+ y i)))))))
+
+(defun date->num (d m y)
+  (+ (- d 1) (month-num m y) (year-num y)))
+
+(defun num->date (n)
+  (multiple-value-bind (y left) (num-year n)
+    (multiple-value-bind (m d) (num-month left y)
+      (values d m y))))
+
+(defun num-year (n)
+  (if (< n 0)
+      (do* ((y (- yzero 1) (- y 1))
+	    (d (- (year-days y)) (- d (year-days y))))
+	   ((<= d n) (values y (- n d))))
+      (do* ((y yzero (+ y 1))
+	    (prev 0 d)
+	    (d (year-days y) (+ d (year-days y))))
+	   ((> d n) (values y (- n prev))))))
+
+(defun num-month (n y)
+  (if (leap? y)
+      (cond ((= n 59) (values 2 29))
+	    ((> n 59) (nmon (- n 1)))
+	    (t        (nmon n)))
+      (nmon n)))
+
+(defun nmon (n)
+  (let ((m (position n month :test #'<)))
+    (values m (+ 1 (- n (svref month (- m 1)))))))
+
+(defun date+ (d m y n)
+  (num->date (+ (date->num d m y) n)))
+	   

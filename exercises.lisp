@@ -1,0 +1,360 @@
+(defun mystery (x y)
+  (if (null y)
+      nil
+      (if (eql (car y) x)
+	  0
+	  (let ((z (mystery x (cdr y))))
+	    (and z (+ z 1))))))
+
+(defun mystery2 (x y)
+  (cond ((null y) nil)
+	((eql (car y) x) 0)
+	(t (let ((z (mystery x (cdr y))))
+	     (and z (+ z 1))))))
+
+(defun mysquare (x)
+  (case x
+    (1 1)
+    (2 4)
+    (3 9)
+    (4 16)
+    (t (* x x))))
+
+(defun iprecedes (obj vect)
+  (let ((ret nil))
+    (do ((i 1 (+ i 1)))
+	((= i (length vect)))
+      (if (and
+	   (eql obj (aref vect i))
+	   (not (member (aref vect (- i 1)) ret)))
+	  (setf ret (cons (aref vect (- i 1)) ret))))
+    ret))
+
+(defun rprecedes (obj vect)
+  (cond ((< (length vect) 2) nil)
+	((eql obj (aref vect 1)) (cons (aref vect 0) (rprecedes obj (subseq vect 1))))
+	 (t (rprecedes obj (subseq vect 1)))))
+
+(defun intersperse (obj lst)
+  (if (null (cdr lst))
+      lst
+      (cons (car lst) (cons obj (intersperse obj (cdr lst))))))
+
+(defun intersperse-iter (obj lst)
+  (let ((out nil))
+    (dolist (x lst)
+      (setf out (append out (list x obj))))
+    (setf out (butlast out))))
+
+(defun diff-one-r (lst)
+  (cond ((null (cdr lst)) T)
+	((and (/= 1 (- (car lst) (cadr lst)))
+	      (/= 1 (- (cadr lst) (car lst))))
+	 nil)
+	(T (diff-one-r (cdr lst)))))
+
+(defun diff-one-d (lst)
+  (let ((ret t))
+    (do ((i 1 (+ i 1)))
+	((>= i (length lst)))
+      (if (and (/= 1 (- (elt lst (- i 1)) (elt lst i)))
+	       (/= 1 (- (elt lst i) (elt lst (- i 1)))))
+	  (setf ret nil)))
+    ret))
+
+(defun diff-one-m (lst)
+  (let ((prev nil))
+    (mapc #'(lambda (x)
+	      (cond ((null prev) (setf prev x))
+		    ((and (/= 1 (- prev x))
+			  (/= 1 (- x prev)))
+		     (return-from diff-one-m nil))
+		    (t (setf prev x))))
+	  lst)
+    t))
+
+(defun max-r (vect)
+  (cond ((<= (length vect) 1) (svref vect 0))
+	((> (svref vect 0) (max-r (subseq vect 1))) (svref vect 0))
+	(t (max-r (subseq vect 1)))))
+
+(defun max-min-r (vect)
+  "Returns the maximum and minumum values from a vector"
+  (if (<= (length vect) 1)
+      (values (svref vect 0) (svref vect 0))
+      (multiple-value-bind (g l)
+	  (max-min-r (subseq vect 1))
+	(values
+	 (max (svref vect 0) g)
+	 (min (svref vect 0) l)))))
+
+(defun max-min-l (lst)
+  "Returns the maximum and minumum values from a list"
+  (if (null (cdr lst))
+      (values (car lst) (car lst))
+      (multiple-value-bind (g l)
+	  (max-min-l (cdr lst))
+	(values
+	 (max (car lst) g)
+	 (min (car lst) l)))))
+
+(defun philosoph (thing &optional property)
+  (list thing 'is property))
+
+(defvar mylist '(3 2 9 4 8 5))
+
+;;;; Utility functions
+
+(defun single? (lst)
+  (and (consp lst) (null (cdr lst))))
+
+(defun append1 (lst obj)
+  (append lst (list obj)))
+
+(defun map-int (fn n)
+  (let ((acc nil))
+    (dotimes (i n)
+      (push (funcall fn i) acc))
+    (nreverse acc)))
+
+(defun filter (fn lst)
+  (let ((acc nil))
+    (dolist (x lst)
+      (let ((val (funcall fn x)))
+	(if val (push val acc))))
+    (nreverse acc)))
+
+(defun most (fn lst)
+  (if (null lst)
+      (values nil nil)
+      (let* ((wins (car lst))
+	     (max (funcall fn wins)))
+	(dolist (obj (cdr lst))
+	  (let ((score (funcall fn obj)))
+	    (when (> score max)
+	      (setf wins obj
+		    max score))))
+	(values wins max))))
+
+(defun range (start stop &optional (interval 1))
+  (let ((acc nil))
+    (do ((i start (+ i interval)))
+	((>= i stop))
+      (push i acc))
+    (nreverse acc)))
+
+(defun compose (&rest fns)
+  (destructuring-bind (fn1 . rest) (reverse fns)
+    #'(lambda (&rest args)
+	(reduce #'(lambda (v f) (funcall f v))
+		rest
+		:initial-value (apply fn1 args)))))
+
+(defun disjoin (fn &rest fns)
+  (if (null fns)
+      fn
+      (let ((disj (apply #'disjoin fns)))
+	#'(lambda (&rest args)
+	    (or (apply fn args) (apply disj args))))))
+
+(defun conjoin (fn &rest fns)
+  (if (null fns)
+      fn
+      (let ((conj (apply #'conjoin fns)))
+	#'(lambda (&rest args)
+	    (and (apply fn args) (apply conj args))))))
+
+(defun curry (fn &rest args)
+  #'(lambda (&rest args2)
+      (apply fn (append args args2))))
+
+(defun rcurry (fn &rest args)
+  #'(lambda (&rest args2)
+      (apply fn (append args2 args))))
+
+;; (defun always (x)
+;;   #'(lambda (&rest args) x))
+
+(defun print-args (&rest args)
+  "Prints all args"
+  (print args))
+
+(defun num-args (&rest args)
+  "Returns the number of args"
+  (length args))
+
+(defun two-most (fn lst)
+  (if (null lst)
+      (values nil nil)
+      (let* ((wins1 (car lst))
+	     (max1 (funcall fn wins1))
+	     (wins2 nil)
+	     (max2 nil))
+	(dolist (obj (cdr lst))
+	  (let ((score (funcall fn obj)))
+	    (when (and (<= score max1)
+		       (or (null max2)
+			   (> score max2)))
+	      (setf wins2 obj
+		    max2 score))
+	    (when (> score max1)
+	      (setf wins2 wins1
+		    max2 max1
+		    wins1 obj
+		    max1 score))))
+	(values (list wins1 max1) (list wins2 max2)))))
+
+(let ((greatest nil))
+  (defun greatest-so-far (num)
+    "Returns the greates number passed to it so far"
+    (if (or (null greatest)
+	    (> num greatest))
+	(setf greatest num))
+    greatest))
+
+(defun print-float-array (arr &optional (width 10) (decimal-places 2))
+  "Takes a two-dimensional array of floats and prints it in neat
+columns. By default columns are 10 characters wide and floats are
+displayed with 2 digits past the decimal point"
+  (print "not yet implemented"))
+
+(defun valid-parentheses-p (string)
+  "Validates that evey (, [, or { has a matching ), ] or } respectively"
+  (let ((stack nil))
+    (loop for char across string
+	  do (cond
+	       ((member char '(#\( #\[ #\{))
+		(push char stack))
+	       ((member char '(#\) #\] #\}))
+		(if (null stack)
+		    (return-from valid-parentheses-p nil)
+		    (let ((top (car stack)))
+		      (cond
+			((and (char= char #\)) (char= top #\()))
+			((and (char= char #\]) (char= top #\[)))
+			((and (char= char #\}) (char= top #\{)))
+			(t (return-from valid-parentheses-p nil)))
+		      (pop stack))))))
+    (null stack)))
+
+;;; File utilities
+
+(defun write-to-file (path text)
+  "Writes text to a file specified by a path object"
+  (with-open-file (str path :direction :output
+			    :if-exists :supersede)
+    (format str "~A~%" text)))
+
+(defun read-file (path &optional (outstream t))
+  "Reads text from  a file"
+  (with-open-file (str path :direction :input)
+    (do ((line (read-line str nil 'eof)
+	       (read-line str nil 'eof)))
+	((eql line 'eof))
+      (format outstream "~A~%" line))))
+
+(defun read-file-str (path)
+  "Returns a list of strings, each a line in the file."
+  (with-open-file (str path :direction :input)
+    (loop for line = (read-line str nil 'eof)
+	  until (eq line 'eof)
+	  collect line)))
+
+(defun read-file-expr (path)
+  "Returns a list of the expressions in the file."
+  (with-open-file (str path :direction :input)
+    (loop for expr = (read str nil 'eof)
+	  until (eq expr 'eof)
+	  collect expr)))
+
+(defun remove-comments (file1 file2 &optional (commentseq "%"))
+  "Reads file1 and writes contents to file2 skipping comments,
+  from the comment sequence (default %) to the end of the line"
+  (with-open-file (in file1 :direction :input)
+    (with-open-file (out file2 :direction :output
+			       :if-exists :supersede)
+      (do ((line (read-line in nil 'eof)
+		 (read-line in nil 'eof)))
+	  ((eql line 'eof))
+	(format out "~A~%"
+		(subseq line 0
+			(search commentseq line)))))))
+
+;;; String Substitution
+
+(defstruct buf
+  vec (start -1) (used -1) (new -1) (end -1))
+
+(defun bref (buf n)
+  (svref (buf-vec buf)
+	 (mod n (length (buf-vec buf)))))
+
+(defun (setf bref) (val buf n)
+  (setf (svref (buf-vec buf)
+	       (mod n (length (buf-vec buf))))
+	val))
+
+(defun new-buf (len)
+  (make-buf :vec (make-array len)))
+
+(defun buf-insert (x b)
+  (setf (bref b (incf (buf-end b))) x))
+
+(defun buf-pop (b)
+  (prog1
+      (bref b (incf (buf-start b)))
+    (setf (buf-used b) (buf-start b)
+	  (buf-new b) (buf-end b))))
+
+(defun buf-next (b)
+  (when (< (buf-used b) (buf-new b))
+    (bref b (incf (buf-used b)))))
+
+(defun buf-reset (b)
+  (setf (buf-used b) (buf-start b)
+	(buf-new b) (buf-end b)))
+
+(defun buf-clear (b)
+  (setf (buf-start b) -1 (buf-used b) -1
+	(buf-new b) -1 (buf-end b) -1))
+
+(defun buf-flush (b str)
+  (do ((i (1+ (buf-used b)) (1+ 1)))
+      ((> i (buf-end b)))
+    (princ (bref b i) str)))
+
+(defun file-subst (old new file1 file2)
+  (with-open-file (in file1 :direction :input)
+    (with-open-file (out file2 :direction :output
+			       :if-exists :supersede)
+      (stream-subst old new in out))))
+
+(defun stream-subst (old new in out)
+  (let* ((pos 0)
+	 (len (length old))
+	 (buf (new-buf len))
+	 (from-buf nil))
+    (do ((c (read-char in nil :eof)
+	    (or (setf from-buf (buf-next buf))
+		(read-char in nil :eof))))
+	((eql c :eof))
+      (cond ((char= c (char old pos))
+	     (incf pos)
+	     (cond ((= pos len)            ; 3
+		    (princ new out)
+		    (setf pos 0)
+		    (buf-clear buf))
+		   ((not from-buf)         ; 2
+		    (buf-insert c buf))))
+	    ((zerop pos)                   ; 1
+	     (princ c out)
+	     (when from-buf
+	       (buf-pop buf)
+	       (buf-reset buf)))
+	    (t                             ; 4
+	     (unless from-buf
+	       (buf-insert c buf))
+	     (princ (buf-pop buf) out)
+	     (buf-reset buf)
+	     (setf pos 0))))
+    (buf-flush buf out)))

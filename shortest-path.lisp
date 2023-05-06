@@ -1,0 +1,22 @@
+(defun shortest-path (start end net)
+  "Finds the shortest path from start to end using a breadth-first search."
+  (bfs end (list (list start)) net))
+
+(defun bfs (end queue net)
+  "The breadth-first search for the shortest-path function"
+  (if (null queue)
+      nil
+      (let ((path (car queue)))
+	(let ((node (car path)))
+	  (if (eql node end)
+	      (reverse path)
+	      (bfs end
+		   (append (cdr queue)
+			   (new-paths path node net))
+		   net))))))
+
+(defun new-paths (path node net)
+  (mapcar #'(lambda (n)
+	      (cons n path))
+	  (cdr (assoc node net))))
+

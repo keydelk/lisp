@@ -1,0 +1,9 @@
+This line has no comments.
+This line has the percent sign as a comment % this is the comment
+This line has the same comment symbol without a space%comment
+The next line is just a comment
+% this whole line is a comment
+This line has Python style comment # this is the comment
+# this line is just a python-style comment
+This line has a double slash comment // this is the slashed comment
+// just a double slash comment

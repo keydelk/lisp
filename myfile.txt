@@ -1,0 +1,3 @@
+This is a test of my function.
+Can it be multiple lines long?
+The answer appears to be yes.

@@ -1,0 +1,6 @@
+(defun occurrences (lst)
+  "Takes a list and returns a list indicating the number of times each
+element (eql) appears, sorted from most common to least common"
+  (let ((sorted (sort (copy-list lst) #'string<)) (out nil))
+    (progn
+      (dolist 
