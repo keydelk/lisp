@@ -1,11 +1,13 @@
-(defun super ()
-  (catch 'abort
-    (sub)
-    (format t "This won't print")))
+(defun string-to-bytes (str)
+  "Returns a list of integer codes for each character in a string"
+  (map 'list #'char-code str))
 
-(defun sub ()
-  (throw 'abort 99))
+(defun bytes-to-string (bytes)
+  "Returns a string from list of byte codes"
+  (map 'string #'code-char bytes))
 
-(super)
+(princ "Hello World")
 
-(format t "Hello World")
+(defun hello-world ()
+  "Print Hello World to the console."
+  (princ "Hello World!"))
