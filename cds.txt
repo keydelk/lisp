@@ -1,2 +1,2 @@
 
-((:TITLE "Roses" :ARTIST "Kathy Mattea" :RATING "2.9" :RIPPED "y") (:TITLE "Home" :ARTIST "Dixie Chicks" :RATING "4.2" :RIPPED "n") (:TITLE "Fly" :ARTIST "Dixie Chicks" :RATING 2.4 :RIPPED T) (:TITLE "Shakedown Street" :ARTIST "Grateful Dead" :RATING "3.5" :RIPPED T) (:TITLE "Qi" :ARTIST "Phildel" :RATING "5.0" :RIPPED NIL)) 
+((:TITLE "Icons" :ARTIST "The Craic Show" :RATING 3 :RIPPED NIL) (:TITLE "Roses" :ARTIST "Kathy Mattea" :RATING "2.9" :RIPPED "y") (:TITLE "Home" :ARTIST "Dixie Chicks" :RATING 4.5 :RIPPED T) (:TITLE "Fly" :ARTIST "Dixie Chicks" :RATING 2.4 :RIPPED T) (:TITLE "Shakedown Street" :ARTIST "Grateful Dead" :RATING "3.5" :RIPPED T) (:TITLE "Qi" :ARTIST "Phildel" :RATING "5.0" :RIPPED NIL)) 

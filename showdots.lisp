@@ -12,8 +12,8 @@
 
 (defun showdots (lst)
   "Takes a list and prints it in dot notation. Returns nil."
-  (progn
-    (princ (showdot lst))
-    nil))
+  (princ (showdot lst)))
 
 (showdots '(a b c d e))
+
+(cdr '(a b c d e))

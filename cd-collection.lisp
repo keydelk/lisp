@@ -43,5 +43,37 @@
 (defun load-db (filename)
   "Load a previously saved database from FILENAME"
   (with-open-file (in filename)
-    with-standard-io-syntax
-    (setf *db* (read in))))
+    (with-standard-io-syntax
+      (setf *db* (read in)))))
+
+(defun select (selector-fn)
+  "Select albums from *db* by a selector function SELECTOR-FN."
+  (remove-if-not selector-fn  *db*))
+
+(defun where (&key title artist rating (ripped nil ripped-p))
+  #'(lambda (cd)
+      (and
+       (if title    (equal (getf cd :title)  title)  t)
+       (if artist   (equal (getf cd :artist) artist) t)
+       (if rating   (equal (getf cd :rating) rating) t)
+       (if ripped-p (equal (getf cd :ripped) ripped) t))))
+
+(defun update (selector-fn &key title artist rating (ripped nil ripped-p))
+  "Update *db* SELECTOR-FN should be a where function, can update TITLE,
+   ARTIST, RATING and RIPPED properties."
+  (setf *db*
+        (mapcar
+         #'(lambda (row)
+             (when (funcall selector-fn row)
+               (if title    (setf (getf row :title)  title))
+               (if artist   (setf (getf row :artist) artist))
+               (if rating   (setf (getf row :rating) rating))
+               (if ripped-p (setf (getf row :ripped) ripped)))
+             row)
+         *db*)))
+
+(defun delete-rows (selector-fn)
+  "Remove rows that match SELECTOR-FN (where function) from *db*."
+  (setf *db* (remove-if selector-fn *db*)))
+
+(load-db "cds.txt")
