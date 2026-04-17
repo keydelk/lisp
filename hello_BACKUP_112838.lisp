@@ -8,6 +8,16 @@
 
 (princ "Hello World")
 
+<<<<<<< HEAD
+(format t "Hello World")
+
+(defun str-to-bytes (str)
+  "Returns a list of bytes for a string"
+  (map 'list #'char-int str))
+
+(remove-if-not #'evenp '(1 2 3 4 5 6 7 8))
+=======
 (defun hello-world ()
   "Print Hello World to the console."
   (princ "Hello World!"))
+>>>>>>> refs/remotes/origin/master
