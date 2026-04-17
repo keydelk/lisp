@@ -8,6 +8,10 @@
 
 (princ "Hello World")
 
+<<<<<<< Updated upstream
 (defun hello-world ()
   "Print Hello World to the console."
   (princ "Hello World!"))
+=======
+(print "Hello World")
+>>>>>>> Stashed changes

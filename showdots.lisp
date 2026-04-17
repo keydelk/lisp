@@ -15,3 +15,5 @@
   (progn
     (princ (showdot lst))
     nil))
+
+(showdots '(a b c d e))
