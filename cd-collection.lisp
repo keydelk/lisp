@@ -50,6 +50,11 @@
   "Select albums from *db* by a selector function SELECTOR-FN."
   (remove-if-not selector-fn  *db*))
 
+(defun make-comparison-expr (field value)
+  "Helper function for the WHERE macro. Return an EQUAL expression comparing
+   FIELD to VALUE."
+  `(equal (getf cd ,field) ,value))
+
 (defun where (&key title artist rating (ripped nil ripped-p))
   #'(lambda (cd)
       (and
